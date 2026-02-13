@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒釀桂圓麵包(CSV網頁版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Serif TC', serif; background-color: #f0ebe5; }
+        .module-card { background: white; border: 1px solid #d6d3d1; border-radius: 16px; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+        .module-header { padding: 1.5rem; border-bottom: 2px solid; }
+        .module-a-header { background-color: #fffbeb; border-color: #d97706; color: #92400e; }
+        .module-b-header { background-color: #f5f5f4; border-color: #44403c; color: #1c1917; }
+        .module-c-header { background-color: #eff6ff; border-color: #1e3a8a; color: #1e3a8a; }
+        .step-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; margin-right: 0.5rem; }
+        .badge-temp { background-color: #fef3c7; color: #92400e; }
+        .badge-speed { background-color: #e0f2fe; color: #0369a1; }
+        .ingredient-line { border-bottom: 1px dashed #e5e7eb; padding: 0.5rem 0; display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .record-box { border-bottom: 2px solid #a8a29e; height: 2rem; width: 100%; display: inline-block; }
+        @media print { 
+            .no-print { display: none; } 
+            body { background-color: white; } 
+            .module-card { break-inside: avoid; border: 2px solid #000; box-shadow: none; margin-bottom: 2rem; }
+            .record-section { border: 2px solid #000 !important; background-color: white !important; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-5xl mx-auto">
+        
+        <!-- 全局標題 -->
+         <header class="text-center mb-10">
+            <h1 class="text-4xl font-black text-stone-800 tracking-widest mb-2">酒釀桂圓麵包(吳寶春)</h1>
+            <p class="text-stone-500 text-xs font-bold uppercase tracking-[0.2em]">20260213修正版</p>
+        </header
+
+        <!-- 全局計算機 -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mb-8 no-print flex flex-wrap gap-6 items-end">
+            <div class="flex-1">
+                <label class="block text-[10px] font-black text-stone-400 uppercase mb-2">產量設定</label>
+                <div class="flex gap-4">
+                    <input type="number" id="breadCount" value="6" class="w-1/2 p-2 border-b-2 border-stone-300 outline-none font-bold text-xl text-center placeholder-stone-300" placeholder="數量">
+                    <input type="number" id="targetWeight" value="1097" class="w-1/2 p-2 border-b-2 border-stone-300 outline-none font-bold text-xl text-center placeholder-stone-300" placeholder="單重(g)">
+                </div>
+            </div>
+            <div class="text-xs text-amber-800 font-bold italic pb-2">
+                ※ 數據基準：CSV 原始配方 (總烘焙百分比 219.37%)
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 環境與水溫管控記錄 (Environment Log)       -->
+        <!-- ========================================== -->
+        <div class="record-section bg-stone-100 border-2 border-stone-300 border-dashed rounded-xl p-6 mb-10 print:mb-8">
+            <h3 class="font-black text-stone-700 text-lg mb-4 flex items-center">
+                📝 環境與水溫管控記錄表 (Environment Log)
+                <span class="ml-auto text-[10px] font-normal bg-white px-2 py-1 rounded border border-stone-200 text-stone-400">列印填寫用</span>
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                <div>
+                    <label class="block text-stone-500 font-bold mb-1 text-xs">今日室溫 (°C)</label>
+                    <div class="record-box"></div>
+                </div>
+                <div>
+                    <label class="block text-stone-500 font-bold mb-1 text-xs">今日粉溫 (°C)</label>
+                    <div class="record-box"></div>
+                </div>
+                <div>
+                    <label class="block text-amber-700 font-bold mb-1 text-xs">計算水溫 (°C)</label>
+                    <div class="record-box border-amber-700"></div>
+                </div>
+                <div>
+                    <label class="block text-stone-500 font-bold mb-1 text-xs">攪拌摩擦溫 (預設 24)</label>
+                    <div class="record-box"></div>
+                </div>
+            </div>
+            <div class="mt-4 flex flex-col md:flex-row gap-4 text-[10px] text-stone-500 items-center bg-white p-3 rounded border border-stone-200">
+                <span class="font-bold bg-stone-200 px-2 py-1 rounded">水溫公式</span>
+                <span class="font-mono">建議水溫 = (目標終溫 × 3) - (室溫 + 粉溫 + 摩擦溫)</span>
+                <span class="ml-auto italic text-amber-700 font-bold">※ 若室溫過高，請使用冰塊替代部分水量</span>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODULE A: 中種麵糰 (Levain Module)       -->
+        <!-- ========================================== -->
+        <div class="module-card">
+            <div class="module-header module-a-header flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-black">MODULE A：中種麵糰預拌</h2>
+                    <p class="text-xs font-bold opacity-80 uppercase tracking-wider">環境溫度 26~28 °C</p>
+                </div>
+                <div class="text-right">
+                    <span class="block text-3xl font-black opacity-20">01</span>
+                </div>
+            </div>
+            
+            <div class="p-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <!-- A區：配方表 -->
+                <div class="lg:col-span-1 border-r border-stone-100 pr-6">
+                    <h3 class="text-sm font-black text-amber-800 mb-4 uppercase border-b-2 border-amber-100 pb-2">配方材料 (Ingredients)</h3>
+                    <div id="levainList" class="space-y-1"></div>
+                    <div class="mt-4 p-3 bg-amber-50 rounded text-[10px] text-amber-800 font-bold leading-relaxed">
+                        ★ 職人叮嚀：中種攪拌至無乾粉即可，不需過度攪拌，重點在於材料均勻混合與溫控發酵，目標終溫 24°C。
+                    </div>
+                </div>
+
+                <!-- A區：製程 SOP -->
+                <div class="lg:col-span-2 space-y-6">
+                    <h3 class="text-sm font-black text-amber-800 mb-4 uppercase border-b-2 border-amber-100 pb-2">標準作業程序 (SOP)</h3>
+                    
+                    <!-- A1. 攪拌 -->
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm">1</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1">攪拌成糰 (Mixing)</h4>
+                            <div class="mb-2">
+                                <span class="badge-speed">慢速 4'</span>
+                                <span class="text-stone-400 text-xs mx-1">➔</span>
+                                <span class="badge-speed">快速 1'</span>
+                                <span class="badge-temp">終溫 24°C</span>
+                            </div> 
+                            <div class="text-xs text-stone-600 leading-relaxed space-y-2">
+                            <p>1. 將 <span class="font-bold">高筋麵粉、魯邦種老麵、紅酒、葡萄菌水</span> 倒入攪拌缸。</p>
+                            <p>2. 先以 <span class="font-bold">慢速攪拌 4 分鐘</span>，確認乾粉完全消失且水分充分吸收。</p>
+                            <p>3. 再轉為 <span class="font-bold">快速攪拌 1 分鐘</span>，使麵糰初步收光成糰，產生初步筋度即可。</p>
+                            </div>
+
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- A2. 發酵 -->
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm">2</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1">兩段式發酵 (Fermentation)</h4>
+                            <div class="mb-2">
+                                <span class="badge-temp">室溫 26°C (1h)</span>
+                                <span class="text-stone-400 text-xs mx-1">➔</span>
+                                <span class="badge-temp font-black border border-amber-200">恆溫 20°C (15h)</span>
+                            </div>
+                           <div class="text-xs text-stone-600 leading-relaxed space-y-2">
+                            <p>1. 攪拌後整理麵糰表面，置於發酵盆中。</p>
+                            <p>2. 於 <span class="font-bold">室溫 26°C 靜置 1 小時</span>：啟動酵母活性。</p>
+                            <p>3. 移入 <span class="font-bold text-amber-800 underline">溫度20°C、濕度60% 發酵箱進行 12 ~ 15 小時</span>基本發酵，發展酒味與香氣。完成時體積約 2-2.5 倍大，內部呈蜂巢狀，具備濃郁酒香。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODULE B: 主麵糰 (Main Dough Module)     -->
+        <!-- ========================================== -->
+        <div class="module-card">
+            <div class="module-header module-b-header flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-black">MODULE B：主麵糰生產製程</h2>
+                    <p class="text-xs font-bold opacity-80 uppercase tracking-wider">環境溫度 26~28 °C</p>
+                </div>
+                <div class="text-right">
+                    <span class="block text-3xl font-black opacity-20">02</span>
+                </div>
+            </div>
+            
+            <div class="p-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <!-- B區：配方表 -->
+                <div class="lg:col-span-1 border-r border-stone-100 pr-6">
+                    <h3 class="text-sm font-black text-stone-800 mb-4 uppercase border-b-2 border-stone-200 pb-2">配方材料 (Ingredients)</h3>
+                    <div id="mainList" class="space-y-1"></div>
+                    <div class="mt-4 p-3 bg-stone-100 rounded text-[10px] text-stone-600 font-bold leading-relaxed">
+                         ★ 職人叮嚀：桂圓乾需先用紅酒浸泡12小時備用。
+                    </div>
+                </div>
+
+                <!-- B區：製程 SOP -->
+                <div class="lg:col-span-2 space-y-8">
+                    <h3 class="text-sm font-black text-stone-800 mb-4 uppercase border-b-2 border-stone-200 pb-2">標準作業程序 (SOP)</h3>
+                    
+                    <!-- B1. 攪拌 -->
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-stone-200 text-stone-800 flex items-center justify-center font-bold text-sm">1</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1">主麵糰攪拌 (Final Mixing)</h4>
+                            <div class="mb-2 flex flex-wrap gap-2">
+                                <span class="badge-speed">慢速 2+4'</span>
+                                <span class="text-stone-400 text-xs mx-1">➔</span>
+                                <span class="badge-speed">快速 1'</span>
+                                <span class="text-stone-400 text-xs mx-1">➔</span>
+                                <span class="badge-speed bg-amber-100 text-amber-900 border border-amber-200">投料 L 1-2'</span>
+                                <span class="badge-temp">終溫 26°C</span>
+                            </div>
+                            <ul class="text-xs text-stone-600 list-disc pl-4 space-y-1">
+                                <li><strong>成糰：</strong>加入中種(撕碎)、高筋麵粉、熟胚芽粉、水、甘蔗糖蜜、鹽，<strong>慢速 2 分鐘</strong>。</li>
+                                <li><strong>擴展：</strong>加入酵母後，<strong>持續慢速攪拌 4 分鐘</strong>再轉<strong>快速 1 分鐘</strong>打至擴展階段(可拉出透明薄膜,裂口呈鋸齒狀)。</li>
+                                <li><strong>投料：</strong>加入<span class="text-amber-800 font-bold">桂圓與浸泡的紅酒、核桃再<strong>慢速攪拌 1 分鐘</strong></span>，混勻即停，保護果乾完整。</li>
+                            </ul>
+                            <div class="mt-4 p-3 bg-stone-100 rounded text-[10px] text-stone-600 font-bold leading-relaxed">
+                             ★ 職人叮嚀:桂圓與核桃請務必在最後慢速階段加入，避免果乾破碎影響口感。
+                           </div>
+                        </div>
+                    </div>
+
+                     <!-- B2. 發酵與整形 -->
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-stone-200 text-stone-800 flex items-center justify-center font-bold text-sm">2</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1">發酵與整形流程 (Process)</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                                <div class="bg-stone-50 p-2 rounded text-center border border-stone-100">
+                                    <div class="text-[10px] text-stone-400 font-bold">基本發酵 </div>
+                                    <div class="text-xs font-bold text-stone-700">60 min </div>
+                                </div>
+                                <div class="bg-stone-50 p-2 rounded text-center border border-stone-100">
+                                    <div class="text-[10px] text-stone-400 font-bold">分割</div>
+                                    <div class="text-xs font-bold text-stone-700">每塊1公斤重 </div>
+                                </div>
+                                <div class="bg-stone-50 p-2 rounded text-center border border-stone-100">
+                                    <div class="text-[10px] text-stone-400 font-bold">中間發酵</div>
+                                    <div class="text-xs font-bold text-stone-700">60 min </div>
+                                </div>
+                                <div class="bg-stone-50 p-2 rounded text-center border border-stone-100">
+                                    <div class="text-[10px] text-stone-400 font-bold">整形</div>
+                                    <div class="text-xs font-bold text-stone-700">以手掌包住麵團，輕輕滾圓放入發酵箱</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- B3. 烘烤 -->
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-stone-800 text-white flex items-center justify-center font-bold text-sm">3</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1">最後發酵 ➔ 烘烤 (Proof & Bake)</h4>
+                            <div class="mb-2">
+                                <span class="badge-temp">後發 60 min</span>
+                                <span class="badge-temp border-red-200 bg-red-50 text-red-800">爐溫 上火/下火 195/195 °C</span>
+                                <span class="badge-temp border-red-200 bg-red-50 text-red-800">中心溫度 95°C</span>
+                            </div>
+                            <p class="text-xs text-stone-600 leading-relaxed">
+                            <strong>最後發酵 60 分鐘</strong>至 2 倍大。
+                            LOGO模具置於麵糰上,撒上麵粉。用麵包刀在麵團四角劃四刀。
+                            <strong>入爐噴蒸汽 5 秒。烘烤約 35-40 分鐘</strong>。出爐前確認麵包中心溫度確保澱粉完全熟化。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+   <!-- ========================================== -->
+        <!-- MODULE C: 時程建議 (New Added Section)   -->
+        <!-- ========================================== -->
+        <div class="module-card">
+            <div class="module-header module-c-header flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-black">MODULE C：製作時程建議</h2>
+                  <!--  <p class="text-xs font-bold opacity-80 uppercase tracking-wider">Production Schedule Options</p>
+                </div>
+                <div class="text-right">
+                    <span class="block text-3xl font-black opacity-20">03</span>
+                </div>
+            </div>
+            
+            <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 兩日排程 (標準) -->
+                <div class="border border-stone-200 rounded-xl p-6 bg-stone-50">
+                    <h3 class="font-black text-amber-800 text-lg mb-4 flex items-center">
+                        <span class="bg-amber-800 text-white text-xs px-2 py-1 rounded mr-2">推薦</span>
+                        兩日職人排程
+                    </h3>
+                    <div class="space-y-4 text-sm text-stone-600">
+                        <div class="flex gap-4">
+                            <div class="w-16 font-bold text-stone-400 text-right">Day 1</div>
+                            <div class="border-l-2 border-amber-200 pl-4 space-y-3">
+                                <div>
+                                    <span class="text-amber-800 font-bold">19:00</span> - <span class="font-black">中種攪拌</span>
+                                    <div class="text-xs text-stone-400">攪拌終溫 24°C</div>
+                                </div>
+                                <div>
+                                    <span class="text-amber-800 font-bold">20:00</span> - <span class="font-black">中種基本發酵</span>
+                                    <div class="text-xs text-stone-400">環境 20°C / 12~15 小時</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 pt-2 border-t border-stone-200">
+                            <div class="w-16 font-bold text-stone-400 text-right">Day 2</div>
+                            <div class="border-l-2 border-stone-300 pl-4 space-y-3">
+                                <div>
+                                    <span class="text-stone-800 font-bold">10:00</span> - <span class="font-black">主麵糰攪拌</span>
+                                    <div class="text-xs text-stone-400">攪拌終溫 26°C</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">10:30</span> - <span class="font-black">第一次基本發酵</span>
+                                    <div class="text-xs text-stone-400">靜置 60 分鐘</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">11:30</span> - <span class="font-black">分割 / 滾圓</span>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">12:00</span> - <span class="font-black">中間發酵</span>
+                                    <div class="text-xs text-stone-400">鬆弛 60 分鐘</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">13:00</span> - <span class="font-black">整形 / 最後發酵</span>
+                                    <div class="text-xs text-stone-400">發酵 60 分鐘</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">14:00</span> - 入爐烘烤
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 單日排程 (長時) -->
+                <div class="border border-stone-200 rounded-xl p-6 bg-white">
+                    <h3 class="font-black text-stone-700 text-lg mb-4 flex items-center">
+                        <span class="bg-stone-200 text-stone-600 text-xs px-2 py-1 rounded mr-2">選項</span>
+                        單日緊湊排程
+                    </h3>
+                    <div class="space-y-4 text-sm text-stone-600">
+                        <div class="p-3 bg-blue-50 text-blue-800 text-xs rounded mb-3">
+                            ⚠️ 注意：需清晨開始以滿足中種 12hr 發酵要求。
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-16 font-bold text-stone-400 text-right">Day 1</div>
+                            <div class="border-l-2 border-blue-200 pl-4 space-y-3">
+                                <div>
+                                    <span class="text-stone-800 font-bold">05:00</span> - <span class="font-black">中種攪拌</span>
+                                    <div class="text-xs text-stone-400">攪拌終溫 24°C</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">06:15</span> - <span class="font-black">中種基本發酵</span>
+                                    <div class="text-xs text-stone-400">20°C / 12 小時</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">18:15</span> - <span class="font-black">主麵糰攪拌</span>
+                                    <div class="text-xs text-stone-400">攪拌終溫 26°C</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">18:45</span> - <span class="font-black">第一次基本發酵</span>
+                                    <div class="text-xs text-stone-400">60 分鐘</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">19:45</span> - 分割 / 滾圓
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">20:00</span> - <span class="font-black">中間發酵</span>
+                                    <div class="text-xs text-stone-400">60 分鐘</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">21:00</span> - <span class="font-black">整形 / 最後發酵</span>
+                                    <div class="text-xs text-stone-400">60 分鐘</div>
+                                </div>
+                                <div>
+                                    <span class="text-stone-800 font-bold">22:00</span> - 入爐烘烤
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 職人小叮嚀 (獨立區塊) -->
+        <div class="mt-8 p-6 bg-white border-l-4 border-amber-800 rounded-r-xl shadow-sm text-sm text-stone-700 space-y-2">
+            <h4 class="font-black text-amber-900 mb-2">職人級核心小叮嚀</h4>
+            <p>● <strong>中種判斷：</strong> 若聞到強烈醋酸味或體積塌陷，代表發酵過度，會影響主麵糰筋度。</p>
+            <p>● <strong>溫度補償：</strong> 夏季製作時，主麵糰建議使用冰水，以抵銷攪拌熱能，確保終溫 26°C。</p>
+            <p>● <strong>色澤管理：</strong> 入爐蒸氣能延緩結皮，是產生酒釀桂圓麵包經典紫紅光澤的關鍵。</p>
+        </div>
+
+        <footer class="mt-10 text-center text-stone-400 text-[10px] tracking-widest no-print pb-10">
+            <button onclick="window.print()" class="bg-stone-800 text-white px-8 py-3 rounded-full font-black text-sm hover:scale-105 transition shadow-lg">
+                列印雙模塊手冊
+            </button>
+        </footer>
+
+    </div>
+
+    <script>
+        const breadCountInput = document.getElementById('breadCount');
+        const targetWeightInput = document.getElementById('targetWeight');
+
+        // CSV 精確數據 (219.37%)
+        const LEVAIN_RECIPE = [
+            { name: "高筋麵粉 (中種)", ratio: 46.67 },
+            { name: "葡萄菌水", ratio: 15.00 },
+            { name: "紅酒 (中種用)", ratio: 15.00 },
+            { name: "魯邦老麵", ratio: 10.00 }
+        ];
+
+        const MAIN_RECIPE = [
+            { name: "中種麵糰 (全量)", ratio: 86.67, special: true }, // 中種加總
+            { name: "高筋麵粉 (主麵)", ratio: 53.33 },
+            { name: "水 (液體調節)", ratio: 35.67 },
+            { name: "熟胚芽粉", ratio: 1.33 },
+            { name: "甘蔗糖蜜", ratio: 1.00 },
+            { name: "鹽", ratio: 1.20 },
+            { name: "新鮮酵母", ratio: 1.50 },
+            { name: "烘烤核桃 (瀝乾)", ratio: 11.67 },
+            { name: "酒漬桂圓 (瀝乾重)", ratio: 23.33 },
+            { name: "紅酒 (後加)", ratio: 3.67 }
+        ];
+
+        const TOTAL_RATIO = 219.37;
+
+        function calculate() {
+            const count = parseFloat(breadCountInput.value) || 1;
+            const weight = parseFloat(targetWeightInput.value) || 1000;
+            const factor = (count * weight) / TOTAL_RATIO;
+
+            let levainHtml = '';
+            LEVAIN_RECIPE.forEach(item => {
+                const w = (item.ratio * factor).toFixed(1);
+                levainHtml += `<div class="ingredient-line"><span>${item.name}</span><span class="font-bold text-amber-900">${w}g <span class="text-stone-300 text-[10px] font-normal">(${item.ratio}%)</span></span></div>`;
+            });
+            document.getElementById('levainList').innerHTML = levainHtml;
+
+            let mainHtml = '';
+            MAIN_RECIPE.forEach(item => {
+                const w = (item.ratio * factor).toFixed(1);
+                const style = item.special ? "text-amber-800 font-bold bg-amber-50 px-1 rounded" : "";
+                mainHtml += `<div class="ingredient-line ${style}"><span>${item.name}</span><span class="font-bold text-stone-900">${w}g <span class="text-stone-300 text-[10px] font-normal">(${item.ratio}%)</span></span></div>`;
+            });
+            document.getElementById('mainList').innerHTML = mainHtml;
+        }
+
+        breadCountInput.addEventListener('input', calculate);
+        targetWeightInput.addEventListener('input', calculate);
+        calculate();
+    </script>
+</body>
+</html>
